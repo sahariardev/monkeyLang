@@ -1,13 +1,17 @@
 package lexer
 
 import (
-	"fmt"
 	"monkeyLang/token"
 )
 
 var keywords = map[string]token.TokenType{
-	"fn":  token.FUNCTION,
-	"let": token.LET,
+	"fn":     token.FUNCTION,
+	"let":    token.LET,
+	"if":     token.IF,
+	"else":   token.ELSE,
+	"return": token.RETURN,
+	"true":   token.TRUE,
+	"false":  token.FALSE,
 }
 
 type Lexer struct {
@@ -33,9 +37,35 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+		if l.peekChar() == '=' {
+			tok.Type = token.EQUAL
+			ch := l.ch
+			l.readChar()
+			tok.Literal = string(ch) + string(l.ch)
+		} else {
+			tok = newToken(token.ASSIGN, l.ch)
+		}
 	case '+':
 		tok = newToken(token.PLUS, l.ch)
+	case '-':
+		tok = newToken(token.MINUS, l.ch)
+	case '!':
+		if l.peekChar() == '=' {
+			tok.Type = token.NOTEQUAL
+			ch := l.ch
+			l.readChar()
+			tok.Literal = string(ch) + string(l.ch)
+		} else {
+			tok = newToken(token.BANG, l.ch)
+		}
+	case '*':
+		tok = newToken(token.ASTERISK, l.ch)
+	case '/':
+		tok = newToken(token.SLASH, l.ch)
+	case '<':
+		tok = newToken(token.LT, l.ch)
+	case '>':
+		tok = newToken(token.GT, l.ch)
 	case ',':
 		tok = newToken(token.COMMA, l.ch)
 	case ';':
@@ -48,6 +78,7 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.LBRACE, l.ch)
 	case '}':
 		tok = newToken(token.RBRACE, l.ch)
+
 	case 0:
 		tok.Type = token.EOF
 
@@ -61,8 +92,6 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Type = token.INT
 			return tok
 		} else {
-			println("-----")
-			fmt.Printf("%c\n", l.ch)
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
 	}
@@ -108,8 +137,20 @@ func (l *Lexer) readNumber() string {
 	return l.input[position:l.pos]
 }
 
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= len(l.input) {
+		return 0
+	}
+
+	return l.input[l.readPosition]
+}
+
 func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
+}
+
+func newTo() {
+
 }
 
 func isLetter(ch byte) bool {
