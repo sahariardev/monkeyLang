@@ -162,8 +162,8 @@ func isDigit(ch byte) bool {
 }
 
 func LookUpIdent(ident string) token.TokenType {
-	if tokeType, ok := keywords[ident]; ok {
-		return tokeType
+	if tokenType, ok := keywords[ident]; ok {
+		return tokenType
 	}
 
 	return token.IDENT
