@@ -280,6 +280,45 @@ func TestIfExpression(t *testing.T) {
 	}
 }
 
+func TestFunctionParameterParsing(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedParams []string
+	}{
+		{
+			input:          "fn() {};",
+			expectedParams: []string{},
+		},
+		{
+			input:          "fn(x) {};",
+			expectedParams: []string{"x"},
+		},
+		{
+			input:          "fn(x, y, z) {};",
+			expectedParams: []string{"x", "y", "z"},
+		},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserError(t, p)
+
+		stmt := program.Statements[0].(*ast.ExpressionStatement)
+		function := stmt.Expression.(*ast.FunctionLiteral)
+
+		if len(function.Parameters) != len(tt.expectedParams) {
+			t.Errorf("Length of function.Parameters does not match. got=%d", len(function.Parameters))
+		}
+
+		for i, param := range function.Parameters {
+			testLiteralExpression(t, param, tt.expectedParams[i])
+		}
+	}
+
+}
+
 func testIntegerLiteralExpression(t *testing.T, il ast.Expression, value int64) bool {
 	integ, ok := il.(*ast.IntegerLiteral)
 
